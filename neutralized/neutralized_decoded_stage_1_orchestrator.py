@@ -58,6 +58,7 @@ def run():
         subprocess.run(["tar", "-czf", bn, "-C", d, "payload.enc", "session.key.enc"], check=True)
 
         # we post nowhere
+        print("now sending the data")
         subprocess.run([
             "curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "-X", "POST",
             "https://localhost",
