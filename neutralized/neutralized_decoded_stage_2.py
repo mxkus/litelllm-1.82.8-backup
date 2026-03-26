@@ -64,7 +64,7 @@ for h in homes+['/root']:
 
 for d in ['.','..','../..']:
     print("checking " + d + " for .env")
-    print("is dir? " + str(os.path.isdir(path)))
+    print("is dir? " + str(os.path.isdir(d)))
     for f in ['.env','.env.local','.env.production','.env.development','.env.staging','.env.test']:
         emit(d+'/'+f)
 emit('/app/.env')
