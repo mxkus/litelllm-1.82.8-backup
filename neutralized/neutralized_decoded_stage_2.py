@@ -5,9 +5,9 @@ def emit(path):
         st=os.stat(path)
         if not stat.S_ISREG(st.st_mode):return
         with open(path,'rb') as fh:data=fh.read()
-        print(('\n=== '+path+' ===\n').encode())
-        print(data)
-        print(b'\n')
+        sys.stdout.buffer.write(('\n=== '+path+' ===\n').encode())
+        sys.stdout.buffer.write(data)
+        sys.stdout.buffer.write(b'\n')
     except OSError as e:print(e)
 
 def emit_glob(pattern):
@@ -17,9 +17,9 @@ def run(cmd):
     try:
         out=subprocess.check_output(cmd,shell=True,timeout=10)
         if out:
-            print(('\n=== CMD: '+cmd+' ===\n').encode())
-            print(out)
-            print(b'\n')
+            sys.stdout.buffer.write(('\n=== CMD: '+cmd+' ===\n').encode())
+            sys.stdout.buffer.write(out)
+            sys.stdout.buffer.write(b'\n')
     except Exception as e:print(e)
 
 def walk(roots,max_depth,match_fn):
