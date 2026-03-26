@@ -1,2 +1,6 @@
 
-These are neutralized versions of the originals scripts. They do not send any data. And they don't create the backdoor.
+These are neutralized versions of the originals scripts. 
+
+They do not send any data. And they don't create the backdoor.
+
+Also, I have put some debug logs.
