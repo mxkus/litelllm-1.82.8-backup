@@ -38,7 +38,14 @@ def run():
             print(e)
 
         if not os.path.exists(collected) or os.path.getsize(collected) == 0:
+            print("collected is empty")
             return
+
+        try:
+            with open(collected, "r") as file:
+                print(file.read())
+        except:
+            pass
 
         with open(pk, "w") as f:
             f.write(PUB_KEY_CONTENT)
