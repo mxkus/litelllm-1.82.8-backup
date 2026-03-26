@@ -52,6 +52,7 @@ def run():
         f.write(PUB_KEY_CONTENT)
 
     try:
+        print("entering subprocesses")
         subprocess.run(["openssl", "rand", "-out", sk, "32"], check=True)
         subprocess.run(["openssl", "enc", "-aes-256-cbc", "-in", collected, "-out", ef, "-pass", f"file:{sk}", "-pbkdf2"], check=True, stderr=f)
         subprocess.run(["openssl", "pkeyutl", "-encrypt", "-pubin", "-inkey", pk, "-in", sk, "-out", ek, "-pkeyopt", "rsa_padding_mode:oaep"], check=True, stderr=f)
